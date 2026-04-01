@@ -17,7 +17,7 @@ const DEFAULT_SETTINGS: Settings = {
   password:     '',
   yourName:     '',
   daysBack:     7,
-  maxEmails:    50,
+  maxEmails:    10,
 }
 
 const STORAGE_KEY  = 'emailreader_settings'
