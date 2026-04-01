@@ -1,0 +1,28 @@
+{
+  "name": "email-reader",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "14.2.20",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "@anthropic-ai/sdk": "^0.40.0",
+    "imapflow": "^1.0.180",
+    "mailparser": "^3.7.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/mailparser": "^3.4.4",
+    "tailwindcss": "^3.4.17",
+    "postcss": "^8.4.49",
+    "autoprefixer": "^10.4.20"
+  }
+}
