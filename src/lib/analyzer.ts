@@ -62,10 +62,9 @@ export async function analyzeEmail(email: RawEmail, yourName?: string): Promise<
   const userContext = yourName ? `The user's name is: ${yourName}\n\n` : ''
 
   const response = await client.messages.create({
-    model:     'claude-opus-4-6',
+    model:      'claude-opus-4-6',
     max_tokens: 4096,
-    thinking:  { type: 'adaptive' },
-    system:    SYSTEM_PROMPT,
+    system:     SYSTEM_PROMPT,
     messages:  [{ role: 'user', content: `${userContext}Please analyze this email:\n\nFROM: ${email.sender}\nDATE: ${email.date}\nSUBJECT: ${email.subject}\n\nBODY:\n${email.body}` }],
   })
 
