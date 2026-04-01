@@ -54,52 +54,28 @@ Rules:
 - money_owed_to_me: only if someone owes the user money or a reimbursement is expected.
 - action_items: concrete, specific tasks derived from this email.`
 
-let _client: Anthropic | null = null
+export async function analyzeEmail(email: RawEmail, yourName?: string): Promise<Record<string, unknown>> {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) throw new Error('Missing ANTHROPIC_API_KEY environment variable.')
 
-function getClient(): Anthropic {
-  if (!_client) {
-    const apiKey = process.env.ANTHROPIC_API_KEY
-    if (!apiKey) throw new Error('Missing ANTHROPIC_API_KEY environment variable.')
-    _client = new Anthropic({ apiKey })
-  }
-  return _client
-}
-
-export async function analyzeEmail(email: RawEmail): Promise<Record<string, unknown>> {
-  const client = getClient()
-  const yourName = process.env.YOUR_NAME ?? ''
+  const client = new Anthropic({ apiKey })
   const userContext = yourName ? `The user's name is: ${yourName}\n\n` : ''
 
-  const userMessage = `${userContext}Please analyze this email:
-
-FROM: ${email.sender}
-DATE: ${email.date}
-SUBJECT: ${email.subject}
-
-BODY:
-${email.body}`
-
   const response = await client.messages.create({
-    model: 'claude-opus-4-6',
+    model:     'claude-opus-4-6',
     max_tokens: 4096,
-    thinking: { type: 'adaptive' },
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: userMessage }],
+    thinking:  { type: 'adaptive' },
+    system:    SYSTEM_PROMPT,
+    messages:  [{ role: 'user', content: `${userContext}Please analyze this email:\n\nFROM: ${email.sender}\nDATE: ${email.date}\nSUBJECT: ${email.subject}\n\nBODY:\n${email.body}` }],
   })
 
-  // With adaptive thinking, thinking blocks may precede the text block
   let text = ''
   for (const block of response.content) {
     if (block.type === 'text') { text = block.text.trim(); break }
   }
 
-  // Strip markdown code fences if Claude added them despite instructions
   if (text.startsWith('```')) {
-    text = text
-      .split('\n')
-      .filter(line => !line.trim().startsWith('```'))
-      .join('\n')
-      .trim()
+    text = text.split('\n').filter(l => !l.trim().startsWith('```')).join('\n').trim()
   }
 
   try {
@@ -107,13 +83,8 @@ ${email.body}`
   } catch {
     return {
       summary: `Could not parse analysis for: ${email.subject}`,
-      is_important: false,
-      flags: [],
-      meetings: [],
-      money_owed_by_me: [],
-      money_owed_to_me: [],
-      scheduling: [],
-      action_items: [],
+      is_important: false, flags: [], meetings: [],
+      money_owed_by_me: [], money_owed_to_me: [], scheduling: [], action_items: [],
     }
   }
 }
